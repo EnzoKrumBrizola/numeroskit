@@ -37,7 +37,7 @@ tr.is-sent td:first-child{text-decoration:line-through}
 <main>
 <h1>Kit S.O.S. — Casa do Parafuso</h1>
 <p><strong>247 contatos</strong> · <span class="progress" id="sent-count">0 de 247 enviados</span></p>
-<p class="note">Clique em “Abrir WhatsApp” para abrir a conversa no WhatsApp Web com a mensagem “Saiba mais: kitsosparafuso.com.br” já preenchida. O vídeo da maleta deve ser anexado manualmente no WhatsApp antes de enviar. Confira o contato e envie somente quando houver autorização adequada para receber mensagens comerciais.</p>
+<p class="note">Clique em “Abrir WhatsApp” para abrir a conversa no WhatsApp Web com a mensagem de apresentação já preenchida (com o nome da oficina quando existe, neutra quando não). Revise antes de enviar. Não mande link nem vídeo agora: o kit só entra depois que a pessoa responder. Envie somente quando houver autorização adequada para receber mensagens comerciais.</p>
 <p class="muted">Contatos sem nome identificado aparecem como “Contato sem nome”. As marcações ficam salvas neste navegador.</p>
 <table>
 <thead><tr><th>Oficina / contato</th><th>Número</th><th>Enviado?</th><th>Ação</th></tr></thead>
@@ -354,6 +354,39 @@ tr.is-sent td:first-child{text-decoration:line-through}
   updateCount();
   renderTimer();
   window.setInterval(renderTimer, 1000);
+})();
+</script>
+ <script>
+(function(){
+  "use strict";
+  var REMETENTE = "Helton";
+  var GENERICO = /^(sem nome informado|contato sem nome|centro automotivo|mecanica automotiva|oficina mecanica|oficina|mecanica|auto center|autocenter|mecanica e eletrica|mecanico 24 horas)$/;
+
+  function norm(s){
+    return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  }
+
+  function limparNome(bruto){
+    var partes = bruto.split(/\s\/\s|\s-\s/);
+    for (var i = 0; i < partes.length; i++){
+      var p = partes[i].split(",")[0].trim();
+      if (p && p.length <= 45 && !GENERICO.test(norm(p))) return p;
+    }
+    return "";
+  }
+
+  function montarMensagem(nome){
+    var saudacao = nome ? "Oi, " + nome + "! Tudo bem?" : "Oi, tudo bem?";
+    return saudacao + " Aqui é o " + REMETENTE + ", da Casa do Parafuso, a loja de parafusos da Rua Joinville, no São Pedro.\n\n" +
+      "Pergunta rápida: quando falta um parafuso ou porca travante no meio do serviço, vocês mandam alguém buscar ou já deixam estoque na oficina?";
+  }
+
+  document.querySelectorAll("tbody tr").forEach(function(row){
+    var nome = limparNome(row.cells[0].textContent);
+    var telefone = row.querySelector(".num").textContent.trim();
+    var link = row.querySelector("a.open");
+    link.href = "https://web.whatsapp.com/send?phone=" + telefone + "&text=" + encodeURIComponent(montarMensagem(nome));
+  });
 })();
 </script>
 </body>
